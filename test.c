@@ -1,12 +1,13 @@
 #include<stdlib.h>
 #include<stdio.h>
 #include<sys/types.h>
+#include<sys/stat.h>
 #include<unistd.h>
 #include<dirent.h>
 
 void not();
 void myhelp();
-void mymove(char *, char *);
+void mymove(int, char *, char *);
 void myremove(char *, int);
 void mycopy(char *, char *);
 void myfind(char *, char *);
@@ -34,7 +35,7 @@ int main(int argc, char *argv[]) {
 				optionp = 1;
 				break;
 			case 'm':
-				mymove(argv[2], argv[3]);
+				mymove(argc, argv[2], argv[3]);
 				break;
 			case 'r':
 				myremove(argv[2], argc);
@@ -56,7 +57,7 @@ int main(int argc, char *argv[]) {
 }
 
 void not() {
-	printf("´õ ¸¹Àº Á¤º¸¸¦ º¸·Á¸é 'mydir -h'ÇÏ½Ê½Ã¿À.\n");
+	printf("ë” ë§ì€ ì •ë³´ë¥¼ ë³´ë ¤ë©´ 'mydir -h'í•˜ì‹­ì‹œì˜¤.\n");
 	exit(0);
 }
 
@@ -67,10 +68,48 @@ void myhelp() {
 	printf("-f : find option\n");
 }
 
-void mymove(char *path1, char *path2) {
+void mymove(int argc, char *path1, char *path2) {
+	struct stat buf;
+	char path[BUFSIZ];
+	char tmp[30];
+	int i=0, j=0;
+	
 	printf("mymove\n");
 	printf("path1 : %s, path2 : %s\n", path1, path2);
+	
+	stat(path2, &buf);
+	
+	if(argc != 4){
+		perror("$mydir -m [dir] [dir]\n");
+		exit;
+	}
+	if(access(path1, F_OK) == -1 && errno == ENOENT){
+		perror("moved file");
+		exit(1);
+	}else if(access(path2, F_OK) == -1 && errno == ENOENT){
+		perror("des dir");
+		exit(1);
+	}
+	
+	tmp[0] = '\0';
+	while(path1[i] != '\0'){
+		tmp[j] = path1[i];
+		j++;
+		if(path1[i] == '/'){
+			tmp[0] = '\0';
+			j = 0;
+		}
+		i++;
+	}
+	tmp[j] = '\0';
+	
+	if(S_ISDIR(buf.st_mode)){
+		sprintf(path, "%s/%s", path2, tmp);
+		rename(path1, path);
+	}else
+		printf("not dirfile");
 }
+	
 
 void myremove(char *path, int arnum) {
 	pid_t pid;
@@ -81,7 +120,7 @@ void myremove(char *path, int arnum) {
 	printf("myremove\n");
 
 	if(arnum != 3) {
-		printf("r¿É¼ÇÀÇ ÀÎÀÚ´Â 1°³ÀÔ´Ï´Ù.");
+		printf("rì˜µì…˜ì˜ ì¸ìëŠ” 1ê°œì…ë‹ˆë‹¤.");
 		not();
 	}
 
@@ -103,8 +142,8 @@ void myremove(char *path, int arnum) {
 			rmdir(path);
 		}
 		else {
-			printf("Dir %sÀÇ ³»ºÎ¿¡ ÆÄÀÏÀÌ Á¸ÀçÇÕ´Ï´Ù.\n", path);
-			printf("µğ·ºÅÍ¸® ³»ºÎ¸¦ ºñ¿ì½Ã´ø°¡ -pr¿É¼ÇÀ» »ç¿ëÇÏ¼¼¿ä\n");
+			printf("Dir %sì˜ ë‚´ë¶€ì— íŒŒì¼ì´ ì¡´ì¬í•©ë‹ˆë‹¤.\n", path);
+			printf("ë””ë ‰í„°ë¦¬ ë‚´ë¶€ë¥¼ ë¹„ìš°ì‹œë˜ê°€ -prì˜µì…˜ì„ ì‚¬ìš©í•˜ì„¸ìš”\n");
 		}
 	}
 	else {
@@ -123,7 +162,7 @@ void myremove(char *path, int arnum) {
 				break;
 		}
 	}
-	printf("%s°¡ »èÁ¦µÇ¾ú½À´Ï´Ù.\n", path);
+	printf("%sê°€ ì‚­ì œë˜ì—ˆìŠµë‹ˆë‹¤.\n", path);
 }
 
 void mycopy(char *path1, char *path2) {
