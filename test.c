@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
 		exit(1);
 	}
 
-	if(argc < 3)
+	if(argc < 2 || argc > 5)
 	{
 		printf("인자가 잘못되어 있습니다.\n");
 		ErrorMsg();
@@ -74,6 +74,7 @@ void DirHelp()
 	printf("--- mv : move 옵션 ---\n");
 	printf("mydir -mv [원본의 경로] [이동할 경로]\n");
 	printf("원본의 경로에서 이동할 경로로 대상의 위치를 이동한다.\n");
+	printf("대상의 위치를 이동할 때 이동할 경로에 대상 파일명이 없다면 이름이 수정되어 이동한다.\n");
 	printf("--- --- ---\n");
 	printf("--- r : 디렉토리 remove 옵션 ---\n");
 	printf("mydir -r [삭제할 디렉토리명]\n");
